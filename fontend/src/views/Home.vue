@@ -2,8 +2,11 @@
   <a-layout class="container">
     <a-layout-header class="header">小说阅读网</a-layout-header>
     <a-layout-content class="content">
-      <Novel></Novel>
-      <a-button type="dashed" @click="showModal" style="color: #1890ff">增加小说</a-button>
+      <Novel :visible="is_show" @close="hideDrawer"></Novel>
+      <div style="position: fixed;top: 40%">
+        <a-button type="dashed" @click="showDrawer" style="color: #1890ff;display: block">小说列表</a-button>
+        <a-button type="dashed" @click="showModal" style="color: #1890ff;display: block">增加小说</a-button>
+      </div>
       <a-row type="flex" justify="center">
         <a-col :span="12" style="overflow:auto">
           <h1 style="text-align: center">{{title}}</h1>
@@ -43,12 +46,20 @@ export default {
   data () {
     return {
       visible: false,
-      form: this.$form.createForm(this)
+      form: this.$form.createForm(this),
+      is_show: false,
+      available: 0
     }
   },
   methods: {
     showModal () {
       this.visible = true
+    },
+    showDrawer () {
+      this.is_show = true
+    },
+    hideDrawer () {
+      this.is_show = false
     },
     handleSubmit (e) {
       e.preventDefault()
@@ -66,6 +77,19 @@ export default {
           })
         }
       })
+    },
+    handleScroll () {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
+      this.height1 = scrollTop
+      this.height2 = document.body.scrollHeight
+      this.height3 = document.compatMode === 'CSS1Compat' ? document.documentElement.clientHeight : document.body.clientHeight
+      console.log(this.height1, this.height2, this.height3)
+      if (this.height3 + this.height1 >= this.height2 - 200 && this.available) {
+        this.available = 0
+        console.log(this.available)
+      } else if (this.height3 + this.height1 < this.height2 - 100) {
+        this.available = 1
+      }
     }
   },
   computed: {
@@ -77,6 +101,9 @@ export default {
     }
   },
   created () {
+  },
+  mounted () {
+    window.addEventListener('scroll', this.handleScroll)
   }
 }
 </script>
